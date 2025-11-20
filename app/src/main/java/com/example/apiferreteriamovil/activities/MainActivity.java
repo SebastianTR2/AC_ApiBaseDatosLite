@@ -1,9 +1,8 @@
 package com.example.apiferreteriamovil.activities;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,14 +23,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView rvUsuarios;
     UsuarioAdapter adapter;
     ApiService apiService;
     EditText edtBuscar;
-    Button btnAddUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +37,9 @@ public class MainActivity extends AppCompatActivity {
 
         rvUsuarios = findViewById(R.id.rvUsuarios);
         rvUsuarios.setLayoutManager(new LinearLayoutManager(this));
-
         edtBuscar = findViewById(R.id.edtBuscar);
 
-
         apiService = ApiClient.getClient().create(ApiService.class);
-
-
 
         cargarUsuarios();
     }
@@ -59,14 +52,17 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<List<Usuario>> call, Response<List<Usuario>> response) {
                     if (response.isSuccessful()) {
-                        List<Usuario> lista = response.body();
-                        Log.d("TEST", "Usuarios obtenidos API: " + lista.size());
 
-                        // guardar en local
+                        List<Usuario> lista = response.body();
+
                         UsuarioRepository repo = new UsuarioRepository(MainActivity.this);
                         repo.guardarUsuarios(lista);
 
                         adapter = new UsuarioAdapter(lista);
+
+                        // LISTENER LONG CLICK
+                        adapter.setOnUsuarioClickListener(usuario -> mostrarOpciones(usuario));
+
                         rvUsuarios.setAdapter(adapter);
                     }
                 }
@@ -78,14 +74,36 @@ public class MainActivity extends AppCompatActivity {
             });
 
         } else {
-            // cargar local
+
             UsuarioRepository repo = new UsuarioRepository(this);
             List<Usuario> listaLocal = repo.obtenerUsuarios();
 
             adapter = new UsuarioAdapter(listaLocal);
+            adapter.setOnUsuarioClickListener(usuario -> mostrarOpciones(usuario));
+
             rvUsuarios.setAdapter(adapter);
         }
     }
 
+    private void mostrarOpciones(Usuario u) {
+        new AlertDialog.Builder(this)
+                .setTitle("Usuario: " + u.nombre)
+                .setItems(new String[]{"Editar", "Eliminar"}, (dialog, which) -> {
+                    if (which == 0) abrirEditar(u);
+                    else eliminarUsuario(u);
+                })
+                .show();
+    }
 
+    private void abrirEditar(Usuario u) {
+        Intent i = new Intent(MainActivity.this, EditUserActivity.class);
+        i.putExtra("id", u.id);
+        i.putExtra("nombre", u.nombre);
+        i.putExtra("correo", u.correo);
+        startActivity(i);
+    }
+
+    private void eliminarUsuario(Usuario u) {
+        // aquí colocar DELETE mas adelante
+    }
 }

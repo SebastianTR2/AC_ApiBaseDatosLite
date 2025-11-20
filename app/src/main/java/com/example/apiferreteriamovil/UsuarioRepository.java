@@ -25,8 +25,8 @@ public class UsuarioRepository {
         for (Usuario u : usuarios) {
             ContentValues values = new ContentValues();
             values.put("id", u.id);
-            values.put("name", u.name);
-            values.put("email", u.email);
+            values.put("name", u.nombre);
+            values.put("email", u.correo);
 
             db.insert(DatabaseHelper.TABLE_USUARIOS, null, values);
         }
@@ -44,8 +44,8 @@ public class UsuarioRepository {
             do {
                 Usuario u = new Usuario();
                 u.id = cursor.getInt(0);
-                u.name = cursor.getString(1);
-                u.email = cursor.getString(2);
+                u.nombre = cursor.getString(1);
+                u.correo = cursor.getString(2);
                 lista.add(u);
             } while (cursor.moveToNext());
         }

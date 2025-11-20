@@ -16,11 +16,21 @@ import java.util.List;
 public class UsuarioAdapter extends RecyclerView.Adapter<UsuarioAdapter.ViewHolder> {
 
     private List<Usuario> lista;
+    private OnUsuarioClickListener listener;
 
     public UsuarioAdapter(List<Usuario> lista) {
         this.lista = lista;
     }
 
+    public interface OnUsuarioClickListener {
+        void onLongClick(Usuario usuario);
+    }
+
+    public void setOnUsuarioClickListener(OnUsuarioClickListener l) {
+        this.listener = l;
+    }
+
+    // Crear holder
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -29,11 +39,19 @@ public class UsuarioAdapter extends RecyclerView.Adapter<UsuarioAdapter.ViewHold
         return new ViewHolder(view);
     }
 
+    // Poner datos
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Usuario u = lista.get(position);
-        holder.txtNombre.setText(u.name);
-        holder.txtCorreo.setText(u.email);
+
+        holder.txtNombre.setText(u.nombre);
+        holder.txtCorreo.setText(u.correo);
+
+        // LONG CLICK
+        holder.itemView.setOnLongClickListener(v -> {
+            if (listener != null) listener.onLongClick(u);
+            return true;
+        });
     }
 
     @Override
@@ -41,7 +59,7 @@ public class UsuarioAdapter extends RecyclerView.Adapter<UsuarioAdapter.ViewHold
         return lista.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtNombre, txtCorreo;
 
         public ViewHolder(@NonNull View itemView) {
